@@ -55,6 +55,7 @@ input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var
 .note summary{font-weight:700;cursor:pointer}
 .note p{margin:.4rem 0 .2rem;font-size:.95rem;color:var(--muted)}
 #go{margin-top:.6rem}
+.hint{margin:-.6rem 0 1rem;font-size:.95rem;color:var(--muted)}
 
 .stage{display:flex;flex-direction:column;align-items:center;gap:1.4rem;text-align:center;padding-top:.5rem}
 .bubble{position:relative;width:100%;min-height:5.75rem;display:flex;align-items:center;justify-content:center;
@@ -114,26 +115,21 @@ input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var
 <section id="s-gate">
   <div class="card">
     <h1>Quick survey</h1>
-    <p>Takes about two minutes. First, who are we hearing from?</p>
+    <p>Takes about two minutes. Enter your name and agree to the terms below to begin.</p>
     <form id="gate" autocomplete="off">
       <label for="name">Your name</label>
       <input id="name" type="text" maxlength="40" required placeholder="Type your name" autocomplete="off">
-      <button class="btn" type="submit">Start survey</button>
+      <p class="hint">Your name is not saved or collected. We only ask for it to make sure you’re a real person and not a bot.</p>
+      <details class="note" open><summary>Privacy notice</summary><p>Taking part is voluntary. You can skip any question or stop at any time. Your answers are kept confidential.</p></details>
+      <label class="check"><input type="checkbox" class="agree"> I understand this survey is voluntary and I can stop anytime.</label>
+      <label class="check"><input type="checkbox" class="agree"> I have read the privacy notice above and agree to it.</label>
+      <label class="check"><input type="checkbox" class="agree"> I agree to answer honestly.</label>
+      <button class="btn" id="go" type="submit" disabled>Start survey</button>
     </form>
   </div>
 </section>
 
-<section id="s-consent" hidden>
-  <div class="card">
-    <h1>Participant agreement</h1>
-    <p>Please read and tick each box to continue.</p>
-    <details class="note" open><summary>Privacy notice</summary><p>Taking part is voluntary. You can skip any question or stop at any time. Your answers are kept confidential.</p></details>
-    <label class="check"><input type="checkbox" class="agree"> I understand this survey is voluntary and I can stop anytime.</label>
-    <label class="check"><input type="checkbox" class="agree"> I have read the privacy notice above and agree to it.</label>
-    <label class="check"><input type="checkbox" class="agree"> I agree to answer honestly.</label>
-    <button class="btn" id="go" disabled>Continue</button>
-  </div>
-</section>
+
 
 <section id="s-capstone" hidden>
   <div class="card">
@@ -232,13 +228,15 @@ $("#gate").addEventListener("submit", e => {
   e.preventDefault();
   const raw = $("#name").value.trim();
   if(!raw) return;
-  isVip = VIP.includes(norm(raw)); $("#who").textContent = raw; show("s-consent");
+  if(!agrees.every(a => a.checked)) return;
+  isVip = VIP.includes(norm(raw)); $("#who").textContent = raw;
+  if(isVip) startMascot(); else show("s-capstone");
   
 });
 $("#back").onclick = () => { $("#name").value = ""; agrees.forEach(a => a.checked = false); $("#go").disabled = true; show("s-gate"); };
 const agrees = [...document.querySelectorAll(".agree")];
 agrees.forEach(c => c.onchange = () => { $("#go").disabled = !agrees.every(a => a.checked); sfx.click(); });
-$("#go").onclick = () => { if(isVip) startMascot(); else show("s-capstone"); };
+
 
 /* Mascot */
 const mascot = $("#mascot"), wrap = $("#wrap"), txt = $("#say"), sr = $("#saySr");
