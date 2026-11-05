@@ -44,13 +44,17 @@ p{margin:.25rem 0 1rem}
 label{font-weight:700;display:block}
 input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var(--line);
   border-radius:1rem;background:var(--bg);color:var(--ink);margin:.4rem 0 1.1rem}
-.check{display:flex;gap:.7rem;align-items:center;margin:1rem 0 1.25rem;cursor:pointer}
-.check input{width:1.4rem;height:1.4rem;accent-color:var(--primary)}
+.check{display:flex;gap:.7rem;align-items:flex-start;margin:.8rem 0;cursor:pointer;font-weight:400}
+.check input{flex:none;width:1.4rem;height:1.4rem;margin:.1rem 0 0;accent-color:var(--primary)}
 .btn{font-weight:600;font-size:1.125rem;border:0;border-radius:999px;padding:.8rem 1.5rem;min-height:3rem;
   background:var(--primary);color:var(--on-primary);cursor:pointer;touch-action:manipulation}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 :focus-visible{outline:3px solid var(--primary);outline-offset:3px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.note{border:2px solid var(--line);border-radius:1rem;padding:.6rem 1rem;margin:.5rem 0;background:var(--bg)}
+.note summary{font-weight:700;cursor:pointer}
+.note p{margin:.4rem 0 .2rem;font-size:.95rem;color:var(--muted)}
+#go{margin-top:.6rem}
 
 .stage{display:flex;flex-direction:column;align-items:center;gap:1.4rem;text-align:center;padding-top:.5rem}
 .bubble{position:relative;width:100%;min-height:5.75rem;display:flex;align-items:center;justify-content:center;
@@ -121,9 +125,12 @@ input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var
 
 <section id="s-consent" hidden>
   <div class="card">
-    <h1>Before we start</h1>
-    <p>A few honest questions. No wrong answers.</p>
-    <label class="check"><input type="checkbox" id="agree"> I agree to answer honestly</label>
+    <h1>Participant agreement</h1>
+    <p>Please read and tick each box to continue.</p>
+    <details class="note" open><summary>Privacy notice</summary><p>Taking part is voluntary. You can skip any question or stop at any time. Your answers are kept confidential.</p></details>
+    <label class="check"><input type="checkbox" class="agree"> I understand this survey is voluntary and I can stop anytime.</label>
+    <label class="check"><input type="checkbox" class="agree"> I have read the privacy notice above and agree to it.</label>
+    <label class="check"><input type="checkbox" class="agree"> I agree to answer honestly.</label>
     <button class="btn" id="go" disabled>Continue</button>
   </div>
 </section>
@@ -185,6 +192,7 @@ input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var
 <script>
 const FROM = "Jn"; // name shown on the final screen
 const VIP = ["collene","princess collene","cajes","princess collene cajes"];
+let isVip = false;
 const $ = s => document.querySelector(s);
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -224,12 +232,13 @@ $("#gate").addEventListener("submit", e => {
   e.preventDefault();
   const raw = $("#name").value.trim();
   if(!raw) return;
-  if(VIP.includes(norm(raw))){ show("s-consent"); }
-  else { $("#who").textContent = raw; show("s-capstone"); }
+  isVip = VIP.includes(norm(raw)); $("#who").textContent = raw; show("s-consent");
+  
 });
-$("#back").onclick = () => { $("#name").value = ""; show("s-gate"); };
-$("#agree").onchange = e => { $("#go").disabled = !e.target.checked; sfx.click(); };
-$("#go").onclick = startMascot;
+$("#back").onclick = () => { $("#name").value = ""; agrees.forEach(a => a.checked = false); $("#go").disabled = true; show("s-gate"); };
+const agrees = [...document.querySelectorAll(".agree")];
+agrees.forEach(c => c.onchange = () => { $("#go").disabled = !agrees.every(a => a.checked); sfx.click(); });
+$("#go").onclick = () => { if(isVip) startMascot(); else show("s-capstone"); };
 
 /* Mascot */
 const mascot = $("#mascot"), wrap = $("#wrap"), txt = $("#say"), sr = $("#saySr");
