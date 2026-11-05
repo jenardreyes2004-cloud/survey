@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quick Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF1C1;--card:#FFFFFF;--ink:#3A2250;--muted:#7B6492;--line:#E9DDF7;
+  --primary:#5B2E91;--on-primary:#FFFFFF;--yes:#5FD3A5;--on-yes:#103B2C;
+  --no:#E7DCF6;--on-no:#3A2250;--bubble:#FFFFFF;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#231833;--card:#33244A;--ink:#F5EBFF;--muted:#BBA6D6;--line:#4A3866;
+    --primary:#B78CFF;--on-primary:#23123A;--yes:#5FD3A5;--on-yes:#0E3326;
+    --no:#4A3866;--on-no:#F5EBFF;--bubble:#33244A;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#231833;--card:#33244A;--ink:#F5EBFF;--muted:#BBA6D6;--line:#4A3866;
+  --primary:#B78CFF;--on-primary:#23123A;--yes:#5FD3A5;--on-yes:#0E3326;
+  --no:#4A3866;--on-no:#F5EBFF;--bubble:#33244A;color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font:400 1.0625rem/1.5 Nunito,ui-rounded,system-ui,sans-serif;
+  display:flex;justify-content:center;overflow-x:hidden}
+main{width:100%;max-width:26rem;padding:1.5rem 1.25rem 2.5rem}
+h1,h2,button,.bubble{font-family:Fredoka,"Baloo 2",ui-rounded,system-ui,sans-serif}
+h1{font-size:1.75rem;line-height:1.15;margin:0 0 .5rem;font-weight:600}
+h2{font-size:1.4rem;line-height:1.2;margin:0 0 .4rem;font-weight:600}
+p{margin:.25rem 0 1rem}
+.card{background:var(--card);border:2px solid var(--line);border-radius:1.5rem;padding:1.5rem;margin-top:1.5rem}
+label{font-weight:700;display:block}
+input[type=text]{width:100%;font:inherit;padding:.8rem 1rem;border:2px solid var(--line);
+  border-radius:1rem;background:var(--bg);color:var(--ink);margin:.4rem 0 1.1rem}
+.check{display:flex;gap:.7rem;align-items:center;margin:1rem 0 1.25rem;cursor:pointer}
+.check input{width:1.4rem;height:1.4rem;accent-color:var(--primary)}
+.btn{font-weight:600;font-size:1.125rem;border:0;border-radius:999px;padding:.8rem 1.5rem;min-height:3rem;
+  background:var(--primary);color:var(--on-primary);cursor:pointer;touch-action:manipulation}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.stage{display:flex;flex-direction:column;align-items:center;gap:1.4rem;text-align:center;padding-top:.5rem}
+.bubble{position:relative;width:100%;min-height:5.75rem;display:flex;align-items:center;justify-content:center;
+  background:var(--bubble);border:2px solid var(--line);border-radius:1.25rem;padding:1rem 1.25rem;
+  font-weight:500;font-size:1.3rem;line-height:1.3}
+.bubble::after{content:"";position:absolute;bottom:-11px;left:50%;width:18px;height:18px;background:var(--bubble);
+  border:2px solid var(--line);border-top:0;border-left:0;transform:translateX(-50%) rotate(45deg)}
+#wrap{width:min(12rem,55vw);cursor:pointer;touch-action:manipulation;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
+#mascot{width:100%;height:auto;display:block;overflow:visible}
+.body{fill:#FFC2D4}.leaf{fill:#6FD6A8}.limb{fill:#FFAFC6}.cheek{fill:#FF8FB1;opacity:.5;transition:opacity .2s,transform .2s;transform-box:fill-box;transform-origin:center}
+.ink{fill:#3A2250}.white{fill:#fff}.tongue{fill:#FF8FB1}.shadow{fill:rgba(58,34,80,.14)}
+.line{fill:none;stroke:#3A2250;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.m-smile,.m-pout,.m-open,.m-wobble,.brows,.brows-sad,.sparkle,.eyes-happy{display:none}
+[data-mood=idle] .m-smile,[data-mood=shy] .m-smile{display:inline}
+[data-mood=shy] .cheek{opacity:.9}
+[data-mood=pout] .m-pout,[data-mood=pout] .brows{display:inline}
+[data-mood=pout] .cheek{transform:scale(1.3)}
+[data-mood=sad] .m-wobble,[data-mood=sad] .brows-sad,[data-mood=sad] .sparkle{display:inline}
+[data-mood=sad] .eye{transform:scale(1.15)}
+.eye{transform-box:fill-box;transform-origin:center;transition:transform .2s}
+[data-mood=cheer] .m-open,[data-mood=cheer] .eyes-happy{display:inline}
+[data-mood=cheer] .eyes-open{display:none}
+.wink{display:none}
+[data-mood=wink] .m-smile,[data-mood=wink] .wink{display:inline}
+[data-mood=wink] .eyes-open .eye:last-child{display:none}
+[data-mood=wink] .cheek{opacity:.95}
+.bob{animation:bob 3.4s ease-in-out infinite}
+.eyes-open{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+
+[data-mood=cheer] .arm{transform-box:fill-box;transform-origin:center;animation:wave .35s ease-in-out infinite alternate}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes wave{to{transform:translateY(-14px) rotate(20deg)}}
+@keyframes pop{0%{transform:scale(.3) translateY(30px);opacity:0}70%{transform:scale(1.08)}100%{transform:none;opacity:1}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-10px) rotate(-4deg)}40%{transform:translateX(10px) rotate(4deg)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+@keyframes squish{35%{transform:scale(1.12,.86)}70%{transform:scale(.94,1.08)}}
+@keyframes jump{30%{transform:translateY(-28px) scale(.95,1.06)}55%{transform:scale(1.08,.9)}}
+.pop{animation:pop .6s cubic-bezier(.3,1.4,.5,1)}.shake{animation:shake .45s}
+.squish{animation:squish .4s}.jump{animation:jump .6s 2}
+
+.choices{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:1rem;width:100%}
+#yes{--n:0;background:var(--yes);color:var(--on-yes);
+  width:min(calc(6rem + var(--n)*2.4rem),100%);height:calc(3.25rem + var(--n)*1rem);
+  font-size:calc(1.2rem + var(--n)*.18rem);border-radius:calc(1.6rem + var(--n)*.3rem);
+  transition:width .3s cubic-bezier(.3,1.5,.5,1),height .3s cubic-bezier(.3,1.5,.5,1),font-size .3s,border-radius .3s}
+#no{background:var(--no);color:var(--on-no);z-index:20;margin:0;
+  transition:left .28s cubic-bezier(.3,1.3,.5,1),top .28s cubic-bezier(.3,1.3,.5,1),transform .28s}
+.heart{position:fixed;pointer-events:none;font-size:1.5rem;z-index:30;animation:rise 1.1s ease-out forwards}
+@keyframes rise{from{opacity:1;transform:translate(0,0) scale(.6)}to{opacity:0;transform:translate(var(--dx),-100px) scale(1.2)}}
+.mute{position:fixed;top:calc(env(safe-area-inset-top,0px) + .75rem);right:.75rem;z-index:25;width:2.75rem;height:2.75rem;padding:0;font-size:1.25rem;line-height:1;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+
+<section id="s-gate">
+  <div class="card">
+    <h1>Quick survey</h1>
+    <p>Takes about two minutes. First, who are we hearing from?</p>
+    <form id="gate" autocomplete="off">
+      <label for="name">Your name</label>
+      <input id="name" type="text" maxlength="40" required placeholder="Type your name" autocomplete="off">
+      <button class="btn" type="submit">Start survey</button>
+    </form>
+  </div>
+</section>
+
+<section id="s-consent" hidden>
+  <div class="card">
+    <h1>Before we start</h1>
+    <p>A few honest questions. No wrong answers.</p>
+    <label class="check"><input type="checkbox" id="agree"> I agree to answer honestly</label>
+    <button class="btn" id="go" disabled>Continue</button>
+  </div>
+</section>
+
+<section id="s-capstone" hidden>
+  <div class="card">
+    <h1>Career Ready student survey</h1>
+    <p>Thanks, <span id="who"></span>. This survey is still unavailable. Please check back later.</p>
+    <button class="btn" id="back">Back</button>
+  </div>
+</section>
+
+<section id="s-mascot" hidden>
+  <button class="mute" id="mute" type="button" aria-label="Sound on" aria-pressed="false">🔊</button>
+  <div class="stage">
+    <div class="bubble" role="status"><span id="say" aria-hidden="true"></span><span id="saySr" class="sr"></span></div>
+    <div id="wrap" role="button" tabindex="0" aria-label="Poke the mascot">
+      <svg id="mascot" viewBox="0 0 200 200" data-mood="idle" aria-hidden="true">
+        <ellipse class="shadow" cx="100" cy="188" rx="54" ry="7"/>
+        <g class="bob">
+          <path class="line" d="M100 56Q99 46 103 40"/><path class="leaf" d="M103 41C100 30 110 24 120 27C121 37 113 43 103 41Z"/>
+          <ellipse class="limb arm" cx="30" cy="126" rx="13" ry="10"/>
+          <ellipse class="limb arm" cx="170" cy="126" rx="13" ry="10"/>
+          <ellipse class="limb" cx="72" cy="178" rx="17" ry="9"/>
+          <ellipse class="limb" cx="128" cy="178" rx="17" ry="9"/>
+          <ellipse class="body" cx="100" cy="115" rx="72" ry="64"/>
+          <ellipse class="cheek" cx="52" cy="133" rx="12" ry="8"/>
+          <ellipse class="cheek" cx="148" cy="133" rx="12" ry="8"/>
+          <g class="eyes-open">
+            
+            <g class="eye"><ellipse class="ink" cx="72" cy="116" rx="9" ry="11"/><circle class="white" cx="69" cy="111" r="3.6"/><circle class="white" cx="75" cy="120" r="1.8"/></g>
+            
+            <g class="eye"><ellipse class="ink" cx="128" cy="116" rx="9" ry="11"/><circle class="white" cx="125" cy="111" r="3.6"/><circle class="white" cx="131" cy="120" r="1.8"/></g>
+          </g>
+          <g class="eyes-happy"><path class="line" d="M62 118q10-14 20 0"/><path class="line" d="M118 118q10-14 20 0"/></g><g class="sparkle"><circle class="white" cx="68" cy="120" r="1.8"/><circle class="white" cx="124" cy="120" r="1.8"/></g><path class="line wink" d="M118 118q10-14 20 0"/>
+          <g class="brows"><path class="line" d="M57 98L81 102"/><path class="line" d="M143 98L119 102"/></g>
+          <g class="brows-sad"><path class="line" d="M57 102L81 97"/><path class="line" d="M143 102L119 97"/></g>
+          <path class="line m-smile" d="M91 128q4.5 6 9 0q4.5 6 9 0"/>
+          <path class="line m-pout" d="M93 134q7-6 14 0"/>
+          <g class="m-open"><path class="ink" d="M90 126Q100 150 110 126Z"/><ellipse class="tongue" cx="100" cy="139" rx="6" ry="4"/></g>
+          <path class="line m-wobble" d="M92 134q4-5 8 0t8 0"/>
+          
+        </g>
+      </svg>
+    </div>
+    
+    <div class="choices" id="choices">
+      <button class="btn" id="yes">Yes</button>
+      <button class="btn" id="no">No</button>
+    </div>
+    <div class="card" id="done" hidden>
+      <h2>Yehey! Sabi mo yes ha.</h2>
+      <p>Pa-screenshot nito tapos send mo kay <span id="from"></span>.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+<script>
+const FROM = "Jn"; // name shown on the final screen
+const VIP = ["collene","princess collene","cajes","princess collene cajes"];
+const $ = s => document.querySelector(s);
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Sound: synthesized in the browser, no audio files */
+let ac, muted = false;
+function tone(f1, f2, dur, type, vol, delay){
+  if(muted) return;
+  const C = window.AudioContext || window.webkitAudioContext; if(!C) return;
+  ac = ac || new C(); if(ac.state === "suspended") ac.resume();
+  const t = ac.currentTime + (delay || 0), o = ac.createOscillator(), g = ac.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f1, t);
+  if(f2 !== f1) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol || .15, t + .015);
+  g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + .03);
+}
+const sfx = {
+  click: () => tone(520, 780, .08, "sine", .1),
+  wink:  () => { tone(1568, 1568, .12, "sine", .12); tone(2093, 2093, .28, "sine", .1, .11); },
+  pop:   () => tone(250, 700, .14, "sine", .2),
+  poke:  () => { tone(700, 1100, .09, "triangle", .18); tone(1100, 800, .09, "triangle", .14, .09); },
+  boing: () => tone(260, 620, .13, "sine", .16),
+  shy:   () => { tone(880, 1180, .1, "sine", .12); tone(1180, 1000, .1, "sine", .1, .1); },
+  pout:  () => tone(240, 160, .22, "triangle", .2),
+  sad:   () => { tone(520, 300, .3, "sine", .18); tone(300, 210, .3, "sine", .14, .28); },
+  yes:   () => { [523, 659, 784, 1047, 1319].forEach((f, k) => tone(f, f, .2, "sine", .16, k*.09)); tone(2093, 2093, .35, "sine", .06, .45); }
+};
+const norm = s => s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z\s]/g," ").replace(/\s+/g," ").trim();
+
+function show(id){
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== id);
+  window.scrollTo(0,0);
+}
+
+/* Gate */
+$("#gate").addEventListener("submit", e => {
+  e.preventDefault();
+  const raw = $("#name").value.trim();
+  if(!raw) return;
+  if(VIP.includes(norm(raw))){ show("s-consent"); }
+  else { $("#who").textContent = raw; show("s-capstone"); }
+});
+$("#back").onclick = () => { $("#name").value = ""; show("s-gate"); };
+$("#agree").onchange = e => { $("#go").disabled = !e.target.checked; sfx.click(); };
+$("#go").onclick = startMascot;
+
+/* Mascot */
+const mascot = $("#mascot"), wrap = $("#wrap"), txt = $("#say"), sr = $("#saySr");
+const choices = $("#choices"), yes = $("#yes"), no = $("#no");
+let base = "idle", typer, pokeTimer, taps = 0, moved = false, px = 0, py = 0;
+
+const ASK = "Tara sabay mag lunch mamaya or bukas?";
+const noLines = [
+  ["Huh? Namali ata ang pindot mo.","sad"],
+  ["Hoy, tumakbo yung No. Hindi yan valid.","pout"],
+  ["Lunch lang naman. Promise, hindi ako nangangagat.","shy"],
+  ["Yung Yes, lumalaki na oh. Sign yan.","pout"],
+  ["Libre ko na. Sige na.","sad"],
+  ["Di ako aalis dito hangga’t di ka nag-Yes.","pout"],
+  ["Ako na ang mapilit. Pero Yes pa rin.","shy"],
+  ["Ang laki na ng Yes oh. Sayang naman.","sad"]
+];
+const noLabels = ["No","No?","Sure ka?","Hmm","Pls no","Wag na"];
+
+function setMood(m){ base = m; mascot.dataset.mood = m; }
+function pulse(c){ wrap.classList.remove("pop","shake","squish","jump"); void wrap.offsetWidth; wrap.classList.add(c); }
+function say(t){
+  clearInterval(typer); sr.textContent = t;
+  if(calm){ txt.textContent = t; return; }
+  txt.textContent = ""; const c = [...t]; let k = 0;
+  typer = setInterval(() => { txt.textContent += c[k++]; if(k >= c.length) clearInterval(typer); }, 26);
+}
+function burst(x, y, n){
+  if(calm) return;
+  const set = ["💛","💖","✨","🍡"];
+  for(let k = 0; k < n; k++){
+    const h = document.createElement("span");
+    h.className = "heart"; h.textContent = set[k % set.length];
+    h.style.left = (x - 12 + (Math.random()*80 - 40)) + "px"; h.style.top = y + "px";
+    h.style.setProperty("--dx", (Math.random()*120 - 60) + "px");
+    document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
+  }
+}
+function startMascot(){
+  $("#from").textContent = FROM;
+  show("s-mascot"); pulse("pop"); sfx.pop(); setMood("idle"); say(ASK);
+}
+
+/* Poke the mascot */
+function poke(){
+  if(base === "cheer" || base === "wink") { pulse("jump"); sfx.poke(); return; }
+  pulse("squish"); sfx.poke(); mascot.dataset.mood = "shy";
+  const r = wrap.getBoundingClientRect(); burst(r.left + r.width/2, r.top + 10, 2);
+  clearTimeout(pokeTimer); pokeTimer = setTimeout(() => mascot.dataset.mood = base, 900);
+}
+wrap.onclick = poke;
+wrap.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); poke(); } };
+
+
+
+/* The No that will not stay put */
+function hop(){
+  if(!moved){
+    const r = no.getBoundingClientRect(); moved = true;
+    no.style.position = "fixed"; no.style.left = r.left + "px"; no.style.top = r.top + "px";
+    px = r.left; py = r.top; void no.offsetWidth;
+  }
+  const w = no.offsetWidth, h = no.offsetHeight, m = 12, top = 72;
+  const maxX = Math.max(m, innerWidth - w - m), maxY = Math.max(top, innerHeight - h - 28);
+  let x, y, t = 0;
+  do { x = m + Math.random()*(maxX - m); y = top + Math.random()*(maxY - top); t++; }
+  while(t < 25 && Math.hypot(x - px, y - py) < 150);
+  px = x; py = y; no.style.left = x + "px"; no.style.top = y + "px";
+  no.style.transform = `scale(${Math.max(.65, 1 - taps*.05)})`;
+}
+no.onclick = () => {
+  taps++; hop();
+  yes.style.setProperty("--n", Math.min(taps, 10));
+  no.textContent = noLabels[Math.min(taps, noLabels.length - 1)];
+  const k = taps <= noLines.length ? taps - 1 : 3 + (taps - 1 - noLines.length) % (noLines.length - 3);
+  const [t, m] = noLines[k];
+  say(t); setMood(m); pulse(m === "pout" ? "shake" : "squish");
+  sfx.boing(); setTimeout(() => sfx[m](), 110);
+};
+yes.onclick = () => {
+  no.hidden = true; choices.hidden = true;
+  setMood("cheer"); pulse("jump"); sfx.yes(); say("YEHEY! Sabay tayo mag lunch!");
+  const r = wrap.getBoundingClientRect(); burst(r.left + r.width/2, r.top + r.height/2, 16);
+  setTimeout(() => {
+    setMood("wink"); pulse("squish"); sfx.wink(); say(`Psst… ${FROM} is interested in you.`);
+    const w = wrap.getBoundingClientRect(); burst(w.left + w.width/2, w.top + w.height/2, 6);
+    $("#done").hidden = false;
+  }, 2800);
+};
+$("#mute").onclick = e => {
+  muted = !muted; const b = e.currentTarget;
+  b.textContent = muted ? "🔇" : "🔊";
+  b.setAttribute("aria-pressed", muted); b.setAttribute("aria-label", muted ? "Sound off" : "Sound on");
+  if(!muted) sfx.click();
+};
+</script>
+</body>
+</html>
